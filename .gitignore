@@ -41,9 +41,6 @@ build/Release
 node_modules/
 jspm_packages/
 
-# Discord bot token
-bot/config/token.js
-
 # TypeScript v1 declaration files
 typings/
 
@@ -105,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Discord bot token
+bot/config/token.json
