@@ -104,4 +104,4 @@ dist
 .tern-port
 
 # Discord bot token
-bot/config/token.json
+bot/config.json
