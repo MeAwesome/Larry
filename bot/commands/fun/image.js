@@ -11,8 +11,14 @@ module.exports = {
     usage: "[search]",
     args: true,
     cooldown: 5,
-    execute(message, args) {
-        message.channel.startTyping();
+    async execute(message, args) {
+        await message.delete();
+        var response = new Discord.MessageEmbed()
+            .setColor("#FFFF00")
+            .setTitle(args.join(" "))
+            .setAuthor("Requested By: " + message.author.username)
+            .setFooter("Searching for your image...");
+        var sendingResponse = await message.channel.send(response);
         const google = new GoogleImageScraper({
             puppeteer: {
                 headless: true,
@@ -22,48 +28,25 @@ module.exports = {
                 ]
             }
         });
-        (async () => {
-            const results = await google.scrape(args.join(" "), 30);
-            var src = results[Math.floor(Math.random() * results.length)].url;
-            var response = new Discord.MessageEmbed()
-                .setColor("#00FF00")
-                .setTitle(args.join(" "))
-                .setAuthor("Requested By: " + message.author.username)
-                .setImage(src)
-                .setFooter("Press ❌ to delete this image.");
-            
-            message.channel.send(response).then(sentResponse => {
-                sentResponse.react('❌').then(() => {
-                    //sentResponse.react('👎')
-                });
-
-                const filter = (reaction, user) => {
-                    return ['❌'].includes(reaction.emoji.name) && user.id == message.author.id;
-                };
-
-                sentResponse.awaitReactions(filter, { max: 1 })
-                    .then(collected => {
-                        const reaction = collected.first();
-                        if (reaction.emoji.name == '❌') {
-                            message.delete().then(() => {
-                                sentResponse.delete().then(() => {
-                                    message.reply('successfully deleted that image you requested.').then((reply) => {
-                                        reply.delete({ timeout: 3000 });
-                                    });
-                                }).catch(() => {
-                                    message.reply('there was an issue deleting the image you requested.');
-                                });
-                            }).catch(() => {
-                                message.reply('there was an issue deleting the image you requested.');
-                            });
-                        }
-                    })
-                    .catch(collected => {
-                        
-                    });
-
-                message.channel.stopTyping();
-            });
-        })();
+        const results = await google.scrape(args.join(" "), 30);
+        var src = results[Math.floor(Math.random() * results.length)].url;
+        response = new Discord.MessageEmbed()
+            .setColor("#00FF00")
+            .setTitle(args.join(" "))
+            .setAuthor("Requested By: " + message.author.username)
+            .setImage(src)
+            .setFooter("Press ❌ to delete this image.");
+        var sentResponse = await sendingResponse.edit(response);
+        await sentResponse.react('❌');
+        const filter = (reaction, user) => {
+            return ['❌'].includes(reaction.emoji.name) && user.id == message.author.id;
+        };
+        var collected = await sentResponse.awaitReactions(filter, { max: 1 });
+        const reaction = collected.first();
+        if (reaction.emoji.name == '❌') {
+            await sentResponse.delete();
+            var reply = await message.reply('successfully deleted that image you requested.');
+            reply.delete({ timeout: 3000 });
+        }
     }
 }
