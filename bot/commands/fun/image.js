@@ -30,7 +30,7 @@ module.exports = {
                 .setTitle(args.join(" "))
                 .setAuthor("Requested By: " + message.author.username)
                 .setImage(src)
-                .setFooter("Press the ❌ to delete this image if I didn't find what you were looking for.\nYou will be unable to delete using the ❌ after 1 minute.");
+                .setFooter("Press ❌ to delete this image.");
             
             message.channel.send(response).then(sentResponse => {
                 sentResponse.react('❌').then(() => {
@@ -41,7 +41,7 @@ module.exports = {
                     return ['❌'].includes(reaction.emoji.name) && user.id == message.author.id;
                 };
 
-                sentResponse.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
+                sentResponse.awaitReactions(filter, { max: 1 })
                     .then(collected => {
                         const reaction = collected.first();
                         if (reaction.emoji.name == '❌') {
